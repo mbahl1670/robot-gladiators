@@ -14,7 +14,7 @@ var fightOrSkip = function() {
     // if player picks 'skip' confirm and then stop the loop
     if (promptFight === "skip" || promptFight === "s") {
         //confirm player wants to skip
-        var confirmSkip = window.confirm("Are you sure you'd like to quit?");
+        var confirmSkip = window.confirm("Are you sure you'd like to quit?  You will lose $10 or all remaining money you have.");
 
         // if yes (true), leave fight
         if (confirmSkip) {
@@ -38,6 +38,7 @@ var fightOrSkip = function() {
 }
 
 var playerTurn = function() {
+    // debugger;
     var turn = true;
     if (Math.random() > 0.5) {
         turn = false;
@@ -46,7 +47,7 @@ var playerTurn = function() {
 };
 
 var fight = function(enemy) {
-    debugger;
+    // debugger;
     // var isPlayerTurn = true;
 
     // if (Math.random() > 0.5 ) {
@@ -56,14 +57,17 @@ var fight = function(enemy) {
     // repeat and execute as long as the enemy-robot is alive
     while (enemy.health > 0 && playerInfo.health > 0) {
         // debugger;
-        var isPlayerTurn = true;
+        var isPlayerTurn = playerTurn();
         
-        isPlayerTurn = playerTurn();
+        console.log(playerInfo);
+        console.log(enemy);
+
+        if (fightOrSkip()) {
+            break;
+        
+        }
         
         if (isPlayerTurn) {
-            if (fightOrSkip()) {
-                break;
-            }
             
             var damage = randomNumber(playerInfo.attack -3, playerInfo.attack);
                     
@@ -76,7 +80,8 @@ var fight = function(enemy) {
         
             // Check enemy's health
             if (enemy.health <= 0) {
-                window.alert(enemy.name + " has died!");
+                window.alert(enemy.name + " has died!  You earn $20!");
+                playerInfo.money = playerInfo.money + 20;
                 break;
             }
             else {
@@ -122,10 +127,6 @@ var fight = function(enemy) {
             else {
                 window.alert(playerInfo.name + " still has " + playerInfo.health + " health left.");
             }
-
-            if (fightOrSkip()) {
-                break;
-            }
             
             var damage = randomNumber(playerInfo.attack -3, playerInfo.attack);
                     
@@ -138,8 +139,8 @@ var fight = function(enemy) {
         
             // Check enemy's health
             if (enemy.health <= 0) {
-                window.alert(enemy.name + " has died!");
-                break;
+                window.alert(enemy.name + " has died!  You earn $20!");
+                playerInfo.money = playerInfo.money + 20;
             }
             else {
                 window.alert(enemy.name + " still has " + enemy.health + " health left.");
@@ -202,30 +203,41 @@ var startGame = function() {
 
 // function to end the entire game
 var endGame = function() {
-    // if layer is still alive, player wins!
-    if (playerInfo.health > 0) {
-        window.alert ("Great job, you've survived the game!  You now have a score of " + playerInfo.money + ".");
+    // debugger;
+    window.alert("The game has now ended.  Let's see how you did!");
+
+    // check localStorage for high score, if its not there, use 0
+    var highScore = localStorage.getItem("highscore");
+        
+    if (highScore === null) {
+        highScore = 0;
+    }
+    // if layer has more money than the high score, player has new high score
+    if (playerInfo.money > highScore && playerInfo.health > 0) {
+        localStorage.setItem("highscore", playerInfo.money);
+        localStorage.setItem("name", playerInfo.name);
+        alert(playerInfo + "now has the high score of " + playerInfo.money + "!");
+    }
+    else if (playerInfo.money <= highScore && playerInfo.health >0) {
+        alert(playerInfo.name + " scored " + playerInfo.money + " and did not beat the high score of " + highScore + ".  Maybe next time!");
     }
     else {
-        window.alert("You've lost your robot in battle. ☹️")
+        alert(playerInfo.name + " died :(.  Maybe next time!"); 
     }
-    
-    // window.alert("The game has now ended.  Let's see how you did!"); old code from learning
-
+        
+    // ask player if they'd like to play again
     var playAgainConfirm = window.confirm("Would you like to play again?");
-
     if (playAgainConfirm) {
-        // restart the game
         startGame();
     }
     else {
         window.alert("Thank you for playing Robot Gladiators!  Come back soon!");
     }
-}
+};
 
 var shop = function() {
     // tell the player they have entered the shop
-    console.log("You have entered the shop");
+    console.log("You have entered the shop.  You have " + playerInfo.money + " dollars.");
 
     // ask player what they'd like to do
     var shopOptionPrompt = window.prompt("Would you like to REFILL your health, UPGRADE your attack, or LEAVE the store? Please enter one 1 for REFILL, 2 for UPGRADE, or 3 for LEAVE.");
